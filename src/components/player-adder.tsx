@@ -19,6 +19,7 @@ export function CreatePlayer(){
         onSuccess: () =>{
             setVisible(true);
             queryClient.invalidateQueries("playercache")
+            queryClient.invalidateQueries("playercache2")
         }
     });
 

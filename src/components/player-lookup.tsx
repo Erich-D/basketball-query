@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { QueryClient, useQuery, useQueryClient } from "react-query";
 import { BasketballPlayer, getAllPlayerByLastName } from "../api/player-request";
 
 type PlayerName = {lname:string}
@@ -7,14 +7,17 @@ type Players = {fname:string, lname:string, bioMetrics:{heightInches:number}}
 
 export function PlayerLookup(){
 
-    const [player,setPlayerName] = useState<PlayerName>({lname:""});
-    const [players,getPlayers] = useState<Players[]>([]);
+    const qClient = useQueryClient();
+    const [player,setPlayerName] = useState<PlayerName>({lname:"!"});
+    const [playerName,setName] = useState<string>("!");
 
-    const fetchPlayers = async () => {
-        const res = await getAllPlayerByLastName(player.lname);
-        getPlayers(res);
-      };
+    const {data:players = []} = useQuery(["playercache2", playerName], ()=>getAllPlayerByLastName(playerName))
 
+    function fetchPlayers(){
+        setName(player.lname)
+        qClient.invalidateQueries("playercache2")
+    }
+        
 
     return <>
         <fieldset>
