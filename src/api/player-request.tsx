@@ -109,6 +109,26 @@ export async function createPlayer(basketballPlayer: BasketballPlayerCreation):P
     return newPlayer;
 }
 
+export async function getAllPlayerByLastName(player: string):Promise<BasketballPlayer[]>{
+    const query = `query GetPlayersByLastName($lnameToSearch: String) {
+        players(lname: $lnameToSearch) {
+          bioMetrics {
+            heightInches
+          }
+          fname
+          lname
+          
+        }
+      }`
+
+      const variables = {lnameToSearch:player};
+      const body = JSON.stringify({query,variables})
+      const httpResponse = await fetch("http://127.0.0.1:8000/graphql", {method:"POST", body, headers:{"Content-Type":"application/json"}});
+      const responseBody = await httpResponse.json();
+      const players:BasketballPlayer[] = responseBody.data.players
+      return players
+}
+
 export async function getAllPlayerIds():Promise<BasketballPlayer[]>{
     const query = `query MyQuery {
         players {
@@ -152,10 +172,8 @@ export async function getAllPlayerStats():Promise<BasketballPlayer[]>{
 }
 
 export async function updatePlayer(player: UpdateForm):Promise<BasketballPlayer>{
-    const query = `mutation MyMutation {
-        mergeStats(
-          input: {playerId: ${player.playerId}, assists: ${player.assists}, blocks: ${player.blocks}, madeBaskets: ${player.madeBaskets}, rebounds: ${player.rebounds}, shotAttempts: ${player.shotAttempts}}
-        ) {
+    const query = `mutation updateStats($input:StatsInput!) {
+        mergeStats(input: $input) {
           ... on BaksetballPlayer {
             playerId
           }
@@ -166,10 +184,35 @@ export async function updatePlayer(player: UpdateForm):Promise<BasketballPlayer>
         }
       }`
 
-    const body = JSON.stringify({query:query})
-      console.log(body)
+    const variables = {input:player};
+    const body = JSON.stringify({query,variables})
+    //console.log(body)
     const httpResponse = await fetch("http://127.0.0.1:8000/graphql", {method:"POST", body, headers:{"Content-Type":"application/json"}});
     const responseBody = await httpResponse.json();
     const players:BasketballPlayer = responseBody.data;
     return players
+}
+
+export type PlayerInput = {
+    fname: string
+    lname: string 
+    heightInches: number 
+    weightLbs: number
+}
+
+export async function addPlayer(newPlayer: PlayerInput):Promise<{playerId:number}>{
+
+    const query = `mutation AddPlayer($playerInput: NewPlayerInput!){
+  
+        addPlayer(input:$playerInput){
+          playerId
+        }
+      }`
+    
+    const variables = {playerInput:newPlayer};
+    const requestBody: string = JSON.stringify({query,variables});
+    const httpResponse = await fetch("http://127.0.0.1:8000/graphql", {method:"POST", body:requestBody, headers:{'Content-Type':"application/json"}});
+    const responseBody = await httpResponse.json();
+    const playerInfo:{playerId:number} = responseBody.data.addPlayer;
+    return playerInfo
 }

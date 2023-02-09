@@ -31,7 +31,7 @@ export function PlayerInfo(){
                 </tr>
             </thead>
             <tbody>
-                {data.map(p => <tr key={Math.random()}><td>{p.fname} {p.lname}</td><td>{p.careerStats.shotAttempts}</td>
+                {data.map(p => <tr key={Math.random()} data-testid={p.fname}><td>{p.fname} {p.lname}</td><td>{p.careerStats.shotAttempts}</td>
                 <td>{p.careerStats.madeBaskets}</td><td>{p.careerStats.rebounds}</td><td>{p.careerStats.assists}</td><td>{p.careerStats.blocks}</td></tr>)}
             </tbody>
             
